@@ -1,0 +1,29 @@
+from io import BytesIO
+import lxml.html
+from PIL import Image
+def get_captcha(html):
+   tree = lxml.html.fromstring(html)
+   img_data = tree.cssselect('div#recaptcha img')[0].get('src')
+   img_data = img_data.partition(',')[-1]
+   binary_img_data = img_data.decode('base64')
+   file_like = BytesIO(binary_img_data)
+   img = Image.open(file_like)
+   return img
+
+import requests
+from lxml import html
+url = 'https://parivahan.gov.in/rcdlstatus/?pur_cd=101'
+
+path = '//*[@id="form_rcdl"]'
+parameters = {'Driving License Number':'Enter your Driving License Number', 'Date of Birth':'Your Date of Birth'}
+r = requests.post('https://parivahan.gov.in/rcdlstatus/?pur_cd=101”, data = parameters')
+r = requests.get(url, data = parameters)
+form_fill = r.content
+source_code = html.fromstring(form_fill)
+tree = source_code.xpath(path)
+print(r.text)
+print(tree[0].text_content())
+
+import json
+
+print(json.dumps({"Driving Licence Number": parameters, "Date of Birth": parameters}))
